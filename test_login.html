@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>EVORIA - Test Login</title>
+</head>
+<body>
+    <h1>Test de Login EVORIA</h1>
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p>Intentando login...</p>';
+
+            try {
+                const response = await fetch('/Evoria/backend/routes/api.php?route=login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@evoria.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                result.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.success) {
+                    result.innerHTML += '<p style="color: green;">✅ Login exitoso!</p>';
+                    sessionStorage.setItem('evoria_user', JSON.stringify(data.user));
+                    setTimeout(() => {
+                        window.location.href = '/Evoria/index.php?page=dashboard';
+                    }, 2000);
+                } else {
+                    result.innerHTML += '<p style="color: red;">❌ Login fallido: ' + data.message + '</p>';
+                }
+            } catch (error) {
+                result.innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+            }
+        }
+
+        testLogin();
+    </script>
+</body>
+</html>

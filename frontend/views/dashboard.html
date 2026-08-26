@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVORIA Dashboard</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
+</head>
+<body class="dashboard-body">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>EVORIA</h2>
+      </div>
+      <nav>
+        <a href="index.php?page=dashboard" class="nav-link active">Dashboard</a>
+        <a href="index.php?page=eventos" class="nav-link">Eventos</a>
+        <a href="index.php?page=recursos" class="nav-link">Recursos</a>
+        <a href="index.php?page=inventario" class="nav-link">Inventario</a>
+        <a href="index.php?page=cronograma" class="nav-link">Cronograma</a>
+        <a href="index.php?page=presupuestos" class="nav-link">Presupuestos</a>
+        <a href="index.php?page=alertas" class="nav-link">Alertas</a>
+        <a href="index.php?page=reportes" class="nav-link">Reportes</a>
+        <a href="index.php?page=auditoria" class="nav-link">Auditoría</a>
+      </nav>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <h3>Dashboard</h3>
+        <div class="user-pill">Bienvenido, <span id="userName">Usuario</span></div>
+      </header>
+
+      <section class="toolbar">
+        <a href="index.php?page=evento_nuevo" class="primary-btn">Nuevo evento</a>
+        <a href="index.php?page=recurso_nuevo" class="secondary-btn">Nuevo recurso</a>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card accent-blue"><span>Eventos próximos</span><strong id="upcomingEvents">-</strong></div>
+        <div class="stat-card accent-green"><span>Eventos activos</span><strong id="activeEvents">-</strong></div>
+        <div class="stat-card accent-purple"><span>Recursos disponibles</span><strong id="availableResources">-</strong></div>
+        <div class="stat-card accent-red"><span>Alertas pendientes</span><strong id="pendingAlerts">-</strong></div>
+      </section>
+
+      <section class="stats-grid secondary">
+        <div class="stat-card accent-gold"><span>Presupuesto total</span><strong id="totalBudget">-</strong></div>
+        <div class="stat-card accent-orange"><span>Inventario bajo</span><strong id="lowInventory">-</strong></div>
+        <div class="stat-card accent-amber"><span>Actividades próximas</span><strong id="upcomingActivities">-</strong></div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <h4>Eventos por estado</h4>
+          <div class="chart-placeholder">Gráfico de barras</div>
+        </div>
+        <div class="panel">
+          <h4>Presupuesto por evento</h4>
+          <div class="chart-placeholder">Gráfico circular</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="frontend/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const charts = document.querySelectorAll('.chart-placeholder');
+      try {
+        const response = await fetch('backend/routes/api.php?route=dashboard/resumen');
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error();
+        const { metrics, events_by_status: events, budget_by_event: budgets } = result.data;
+        const fields = { upcomingEvents: metrics.upcoming_events, activeEvents: metrics.active_events, availableResources: metrics.available_resources, pendingAlerts: metrics.pending_alerts, totalBudget: money(metrics.total_budget), lowInventory: metrics.low_inventory, upcomingActivities: metrics.upcoming_activities };
+        Object.entries(fields).forEach(([id, value]) => document.getElementById(id).textContent = value);
+        drawBars(charts[0], events); drawDonut(charts[1], budgets);
+      } catch (error) { charts.forEach(chart => chart.textContent = 'No se pudo cargar el gráfico.'); }
+    });
+    const money = value => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Number(value || 0));
+    const svg = (tag, attributes = {}) => { const node = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, value)); return node; };
+    const message = (container, text) => { container.replaceChildren(); container.textContent = text; };
+    function drawBars(container, items) {
+      if (!items.length) return message(container, 'Aún no hay eventos para graficar.');
+      container.replaceChildren(); const graphic = svg('svg', { viewBox: '0 0 600 210', role: 'img' }), maximum = Math.max(...items.map(item => Number(item.total)), 1), space = 520 / items.length;
+      items.forEach((item, index) => { const height = Number(item.total) / maximum * 125, width = Math.max(space - 22, 26), x = 48 + index * space, y = 155 - height; graphic.append(svg('rect', { x, y, width, height, rx: 5, fill: '#2563eb' })); const value = svg('text', { x: x + width / 2, y: y - 7, 'text-anchor': 'middle', class: 'chart-value' }); value.textContent = item.total; graphic.append(value); const label = svg('text', { x: x + width / 2, y: 178, 'text-anchor': 'middle', class: 'chart-label' }); label.textContent = item.estado; graphic.append(label); });
+      graphic.append(svg('line', { x1: 30, y1: 155, x2: 575, y2: 155, stroke: '#cbd5e1', 'stroke-width': 2 })); container.append(graphic);
+    }
+    function drawDonut(container, items) {
+      if (!items.length) return message(container, 'Aún no hay presupuestos para graficar.'); const total = items.reduce((sum, item) => sum + Number(item.total), 0); if (total <= 0) return message(container, 'No hay montos de presupuesto para graficar.');
+      container.replaceChildren(); const graphic = svg('svg', { viewBox: '0 0 600 210', role: 'img' }), colors = ['#2563eb','#16a34a','#f59e0b','#8b5cf6','#dc2626','#0891b2']; let offset = 0;
+      items.forEach((item, index) => { const fraction = Number(item.total) / total, color = colors[index % colors.length]; graphic.append(svg('circle', { cx: 120, cy: 105, r: 62, fill: 'none', stroke: color, 'stroke-width': 28, pathLength: 100, 'stroke-dasharray': `${fraction * 100} ${100 - fraction * 100}`, 'stroke-dashoffset': -offset * 100, transform: 'rotate(-90 120 105)' })); offset += fraction; graphic.append(svg('rect', { x: 225, y: 40 + index * 26, width: 11, height: 11, rx: 2, fill: color })); const label = svg('text', { x: 244, y: 50 + index * 26, class: 'chart-label' }); label.textContent = `${item.label}: ${money(item.total)}`; graphic.append(label); });
+      const center = svg('text', { x: 120, y: 110, 'text-anchor': 'middle', class: 'chart-value' }); center.textContent = money(total); graphic.append(center); container.append(graphic);
+    }
+  </script>
+</body>
+</html>

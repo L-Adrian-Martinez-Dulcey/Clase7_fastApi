@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos - EVORIA</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
+</head>
+<body class="dashboard-body">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>EVORIA</h2>
+      </div>
+      <nav>
+        <a href="index.php?page=dashboard" class="nav-link">Dashboard</a>
+        <a href="index.php?page=eventos" class="nav-link active">Eventos</a>
+        <a href="index.php?page=recursos" class="nav-link">Recursos</a>
+        <a href="index.php?page=inventario" class="nav-link">Inventario</a>
+        <a href="index.php?page=cronograma" class="nav-link">Cronograma</a>
+        <a href="index.php?page=presupuestos" class="nav-link">Presupuestos</a>
+        <a href="index.php?page=alertas" class="nav-link">Alertas</a>
+        <a href="index.php?page=reportes" class="nav-link">Reportes</a>
+        <a href="index.php?page=auditoria" class="nav-link">Auditoría</a>
+      </nav>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <h3>Eventos</h3>
+        <div class="user-pill">Bienvenido, <span id="userName">Usuario</span></div>
+      </header>
+
+      <section class="toolbar">
+        <a href="index.php?page=evento_nuevo" class="primary-btn">+ Nuevo evento</a>
+      </section>
+
+      <section class="content-panel">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Fecha</th>
+              <th>Ubicación</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTable">
+            <tr><td colspan="6" style="text-align: center; padding: 20px;">Cargando eventos...</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="frontend/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadEvents();
+    });
+
+    async function loadEvents() {
+      try {
+        const response = await fetch('/Evoria/backend/routes/api.php?route=eventos', {
+          headers: {'Accept': 'application/json'}
+        });
+        const result = await response.json();
+        
+        const tbody = document.getElementById('eventsTable');
+        if (result.success && result.data && result.data.length > 0) {
+          tbody.innerHTML = result.data.map(event => `
+            <tr>
+              <td>${event.id}</td>
+              <td>${event.nombre}</td>
+              <td>${event.fecha_inicio}</td>
+              <td>${event.ubicacion || '-'}</td>
+              <td><span class="badge">${event.estado}</span></td>
+              <td>
+                <button class="btn-sm" onclick="editEvent(${event.id})">Editar</button>
+                <button class="btn-sm btn-danger" onclick="deleteEvent(${event.id})">Eliminar</button>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No hay eventos</td></tr>';
+        }
+      } catch (error) {
+        console.error('Error cargando eventos:', error);
+        document.getElementById('eventsTable').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar eventos</td></tr>';
+      }
+    }
+
+    function editEvent(id) {
+      alert('Funcionalidad de edición por implementar');
+    }
+
+    function deleteEvent(id) {
+      if (confirm('¿Deseas eliminar este evento?')) {
+        alert('Funcionalidad de eliminación por implementar');
+      }
+    }
+  </script>
+</body>
+</html>

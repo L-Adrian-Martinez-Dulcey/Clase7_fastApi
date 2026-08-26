@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVORIA | Inventario</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
+</head>
+<body class="dashboard-body">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand"><h2>EVORIA</h2></div>
+      <nav>
+        <a href="index.php?page=dashboard" class="nav-link">Dashboard</a>
+        <a href="index.php?page=eventos" class="nav-link">Eventos</a>
+        <a href="index.php?page=recursos" class="nav-link">Recursos</a>
+        <a href="index.php?page=inventario" class="nav-link active">Inventario</a>
+        <a href="index.php?page=cronograma" class="nav-link">Cronograma</a>
+        <a href="index.php?page=presupuestos" class="nav-link">Presupuestos</a>
+        <a href="index.php?page=alertas" class="nav-link">Alertas</a>
+        <a href="index.php?page=reportes" class="nav-link">Reportes</a>
+        <a href="index.php?page=auditoria" class="nav-link">Auditoría</a>
+      </nav>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar"><h3>Inventario</h3><div class="user-pill">Bienvenido, <span id="userName">Usuario</span></div></header>
+      <section class="stats-grid secondary">
+        <div class="stat-card accent-green"><span>Recursos disponibles</span><strong id="availableResources">-</strong></div>
+        <div class="stat-card accent-orange"><span>Recursos asignados</span><strong id="assignedResources">-</strong></div>
+        <div class="stat-card accent-blue"><span>Cantidad total</span><strong id="totalQuantity">-</strong></div>
+        <div class="stat-card accent-purple"><span>Cantidad disponible</span><strong id="availableQuantity">-</strong></div>
+      </section>
+      <section class="panel">
+        <h4>Control de inventario</h4>
+        <div id="inventoryTableContainer" class="table-wrap"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="frontend/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const container = document.getElementById('inventoryTableContainer');
+      try {
+        const response = await fetch('backend/routes/api.php?route=inventario');
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error();
+        const { items, summary } = result.data;
+        document.getElementById('availableResources').textContent = summary.resources_available;
+        document.getElementById('assignedResources').textContent = summary.resources_assigned;
+        document.getElementById('totalQuantity').textContent = summary.total_quantity;
+        document.getElementById('availableQuantity').textContent = summary.available_quantity;
+        if (!items.length) { container.textContent = 'No hay recursos activos registrados.'; return; }
+        const table = document.createElement('table'); table.className = 'data-table';
+        const headers = ['Recurso', 'Cantidad total', 'Cantidad disponible', 'Recursos asignados', 'Estado'];
+        const thead = document.createElement('thead'), headerRow = document.createElement('tr'); headers.forEach(text => { const th = document.createElement('th'); th.textContent = text; headerRow.append(th); }); thead.append(headerRow); table.append(thead);
+        const tbody = document.createElement('tbody');
+        items.forEach(item => { const row = document.createElement('tr'); const state = item.estado === 'critico' ? 'Crítico' : item.estado === 'bajo' ? 'Bajo' : 'Normal'; [item.recurso_nombre, item.cantidad_total, item.cantidad_disponible, item.cantidad_asignada, state].forEach(value => { const td = document.createElement('td'); td.textContent = value; row.append(td); }); tbody.append(row); });
+        table.append(tbody); container.replaceChildren(table);
+      } catch { container.textContent = 'No se pudo cargar el inventario.'; }
+    });
+  </script>
+</body>
+</html>

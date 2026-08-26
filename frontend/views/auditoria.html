@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoría - EVORIA</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
+</head>
+<body class="dashboard-body">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>EVORIA</h2>
+      </div>
+      <nav>
+        <a href="index.php?page=dashboard" class="nav-link">Dashboard</a>
+        <a href="index.php?page=eventos" class="nav-link">Eventos</a>
+        <a href="index.php?page=recursos" class="nav-link">Recursos</a>
+        <a href="index.php?page=inventario" class="nav-link">Inventario</a>
+        <a href="index.php?page=cronograma" class="nav-link">Cronograma</a>
+        <a href="index.php?page=presupuestos" class="nav-link">Presupuestos</a>
+        <a href="index.php?page=alertas" class="nav-link">Alertas</a>
+        <a href="index.php?page=reportes" class="nav-link">Reportes</a>
+        <a href="index.php?page=auditoria" class="nav-link active">Auditoría</a>
+      </nav>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <h3>Auditoría</h3>
+        <div class="user-pill">Bienvenido, <span id="userName">Usuario</span></div>
+      </header>
+
+      <section class="content-panel">
+        <h4>Registro de auditoría</h4>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>IP</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="auditTable">
+            <tr><td colspan="7" style="text-align: center; padding: 20px;">Cargando registros de auditoría...</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="frontend/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAudit();
+    });
+
+    async function loadAudit() {
+      try {
+        const tbody = document.getElementById('auditTable');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Próximamente: Módulo de auditoría</td></tr>';
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  </script>
+</body>
+</html>

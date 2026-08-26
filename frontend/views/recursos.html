@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVORIA | Recursos</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
+</head>
+<body class="dashboard-body">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>EVORIA</h2>
+      </div>
+      <nav>
+        <a href="index.php?page=dashboard" class="nav-link">Dashboard</a>
+        <a href="index.php?page=eventos" class="nav-link">Eventos</a>
+        <a href="index.php?page=recursos" class="nav-link active">Recursos</a>
+        <a href="index.php?page=inventario" class="nav-link">Inventario</a>
+        <a href="index.php?page=cronograma" class="nav-link">Cronograma</a>
+        <a href="index.php?page=presupuestos" class="nav-link">Presupuestos</a>
+        <a href="index.php?page=alertas" class="nav-link">Alertas</a>
+        <a href="index.php?page=reportes" class="nav-link">Reportes</a>
+        <a href="index.php?page=auditoria" class="nav-link">Auditoría</a>
+      </nav>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <h3>Recursos</h3>
+        <div class="user-pill">Bienvenido, <span id="userName">Usuario</span></div>
+      </header>
+
+      <section class="toolbar">
+        <a href="index.php?page=recurso_nuevo" class="primary-btn">Crear recurso</a>
+      </section>
+
+      <section class="panel">
+        <h4>Listado de recursos</h4>
+        <div id="resourcesTableContainer" class="table-wrap"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="frontend/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('resourcesTableContainer');
+      if (!container) return;
+
+      fetch('backend/routes/api.php?route=recursos')
+        .then((res) => res.json())
+        .then((result) => {
+          if (!result.success) {
+            container.innerHTML = '<p>No se pudieron cargar los recursos.</p>';
+            return;
+          }
+
+          const resources = result.data || [];
+          if (!resources.length) {
+            container.innerHTML = '<p>No hay recursos registrados.</p>';
+            return;
+          }
+
+          container.innerHTML = `
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Costo</th>
+                  <th>Cantidad</th>
+                  <th>Disponibilidad</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${resources.map((resource) => `
+                  <tr>
+                    <td>${resource.nombre || '-'}</td>
+                    <td>${resource.tipo || '-'}</td>
+                    <td>${resource.costo || '0'}</td>
+                    <td>${resource.cantidad_total || 0}</td>
+                    <td>${resource.disponibilidad || '-'}</td>
+                    <td>${resource.estado || '-'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          `;
+        })
+        .catch(() => {
+          container.innerHTML = '<p>Error al consultar la API.</p>';
+        });
+    });
+  </script>
+</body>
+</html>

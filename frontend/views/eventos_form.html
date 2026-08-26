@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVORIA | Nuevo evento</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
+</head>
+<body class="dashboard-body">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand"><h2>EVORIA</h2></div>
+      <nav>
+        <a href="index.php?page=dashboard">Dashboard</a>
+        <a href="index.php?page=eventos">Eventos</a>
+        <a href="index.php?page=recursos">Recursos</a>
+        <a href="index.php?page=inventario">Inventario</a>
+      </nav>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <h3>Nuevo evento</h3>
+        <div class="user-pill">Bienvenido, <span id="userName">Usuario</span></div>
+      </header>
+
+      <section class="panel">
+        <form id="eventForm" class="form-grid">
+          <div class="full">
+            <label>Nombre<input name="nombre" type="text" required></label>
+          </div>
+          <div class="full">
+            <label>Descripción<textarea name="descripcion" rows="3"></textarea></label>
+          </div>
+          <div>
+            <label>Fecha de inicio<input name="fecha_inicio" type="date" required></label>
+          </div>
+          <div>
+            <label>Fecha de fin<input name="fecha_fin" type="date" required></label>
+          </div>
+          <div>
+            <label>Hora<input name="hora" type="time"></label>
+          </div>
+          <div>
+            <label>Ubicación<input name="ubicacion" type="text"></label>
+          </div>
+          <div>
+            <label>Tipo<select name="tipo"><option value="Congreso">Congreso</option><option value="Boda">Boda</option><option value="Seminario">Seminario</option><option value="Evento Corporativo">Evento Corporativo</option></select></label>
+          </div>
+          <div>
+            <label>Estado<select name="estado"><option value="Planificación">Planificación</option><option value="Confirmado">Confirmado</option><option value="En ejecución">En ejecución</option><option value="Finalizado">Finalizado</option><option value="Cancelado">Cancelado</option></select></label>
+          </div>
+          <div class="full">
+            <button type="submit" class="primary-btn">Guardar evento</button>
+          </div>
+        </form>
+        <div id="eventFormMessage" class="inline-message"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="frontend/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('eventForm');
+      const messageEl = document.getElementById('eventFormMessage');
+      if (!form) return;
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch('backend/routes/api.php?route=eventos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            messageEl.className = 'inline-message error';
+            messageEl.textContent = result.message || 'Error al crear el evento.';
+            return;
+          }
+
+          messageEl.className = 'inline-message success';
+          messageEl.textContent = result.message || 'Evento creado correctamente.';
+          form.reset();
+        } catch (error) {
+          messageEl.className = 'inline-message error';
+          messageEl.textContent = 'No se pudo conectar con la API.';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
