@@ -103,6 +103,8 @@ Documentación: `http://127.0.0.1:8000/docs` y `http://127.0.0.1:8000/redoc`.
 
 La API implementa `GET`, `POST`, `PUT`, `PATCH` y `DELETE` en `/users`, filtros por rol/estado, validaciones Pydantic, errores `400`, `404` y `422`, y la dependencia `get_user_or_404` mediante `Depends()`. Las pruebas están en `device_systems/tests/test_users.py`.
 
+Para entender el funcionamiento paso a paso, consulta [la guia de device_systems](device_systems/README.md).
+
 ## Estado actual
 Este proyecto se encuentra en una primera fase funcional de base y autenticación. La estructura principal, la API, la interfaz y la lógica base ya están creadas. Los módulos avanzados como eventos, cronogramas, presupuestos, inventario, alertas, reportes y auditoría están pendientes de implementación real con base de datos completa.
 
