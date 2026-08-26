@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 storage/
 *.log
+__pycache__/
+*.py[cod]
+.pytest_cache/
