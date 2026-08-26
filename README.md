@@ -87,6 +87,22 @@ FLUSH PRIVILEGES;
 - `POST /api/logout`
 - `GET /api/me`
 
+## Actividad FastAPI: device_systems
+
+La evolución CRUD solicitada para el recurso `users` está integrada en `device_systems/`, dentro de este proyecto. Es un servicio FastAPI separado del backend PHP para conservar la compatibilidad con el sistema EVORIA existente.
+
+Desde la carpeta `Evoria`:
+
+```powershell
+cd device_systems
+py -m pip install -r requirements.txt
+py -m uvicorn app.main:app --reload
+```
+
+Documentación: `http://127.0.0.1:8000/docs` y `http://127.0.0.1:8000/redoc`.
+
+La API implementa `GET`, `POST`, `PUT`, `PATCH` y `DELETE` en `/users`, filtros por rol/estado, validaciones Pydantic, errores `400`, `404` y `422`, y la dependencia `get_user_or_404` mediante `Depends()`. Las pruebas están en `device_systems/tests/test_users.py`.
+
 ## Estado actual
 Este proyecto se encuentra en una primera fase funcional de base y autenticación. La estructura principal, la API, la interfaz y la lógica base ya están creadas. Los módulos avanzados como eventos, cronogramas, presupuestos, inventario, alertas, reportes y auditoría están pendientes de implementación real con base de datos completa.
 
